@@ -10,7 +10,7 @@ const handleErrors = (err, next) => {
   if (err instanceof mongoose.Error.CastError) {
     return next(new BadRequestError('Переданы некорректные данные'));
   }
-  return new DefaultError('Произошла ошибка');
+  return next(new DefaultError('Произошла ошибка'));
 };
 
 module.exports = { handleErrors };
