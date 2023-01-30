@@ -2,11 +2,16 @@ const express = require('express');
 
 const mongoose = require('mongoose');
 
+const bodyParser = require('body-parser');
+
 mongoose.set('strictQuery', true);
 
 const { PORT = 3000 } = process.env;
 
 const app = express();
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 async function start() {
   try {
@@ -22,11 +27,14 @@ async function start() {
 }
 
 start();
-// app.get('/users') // возвращает всех пользователей
 
-// app.get('/users/:userId') //возвращает пользователя по _id
+app.get('/users', require('./routes/users'));
+app.get('/users/:id', require('./routes/users'));
+app.post('/users', require('./routes/users'));
 
-// app.post('/users') // создаёт пользователя
-// // передайте JSON-объект с тремя полями: name, about и avatar.
+app.get('/', (req, res) => {
+  res.send(`<html><h1>Privet</h1></html>`);
+});
 
 
+// 63d7fff4cbcb122e9e0d25b6

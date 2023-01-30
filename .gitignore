@@ -21,6 +21,7 @@ Thumbs.db
 # Misc
 .vscode
 Icon
+.idea
 
 # Node
 dist
@@ -50,6 +51,7 @@ Temporary Items
 ############
 # it better to unpack these files and commit the raw source
 # git has its own built in compression methods
+.npm
 *.7z
 *.dmg
 *.gz
@@ -61,6 +63,8 @@ Temporary Items
 
 # Logs and databases #
 ######################
+logs
+npm-debug.log*
 *.log
 *.sql
 *.sqlite
