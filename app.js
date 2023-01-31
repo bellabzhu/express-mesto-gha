@@ -1,6 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const userRouter = require('./routes/users');
+const cardRouter = require('./routes/cards');
+const { NOT_FOUND } = require('./utils/errors');
 
 const { PORT = 3000 } = process.env;
 mongoose.set('strictQuery', true);
@@ -31,22 +34,26 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/users', require('./routes/users'));
-app.post('/users', require('./routes/users'));
+app.get('/users', userRouter);
+app.post('/users', userRouter);
 
-app.get('/users/:id', require('./routes/users'));
+app.get('/users/:id', userRouter);
 
-app.patch('/users/me', require('./routes/users'));
-app.patch('/users/me/avatar', require('./routes/users'));
+app.patch('/users/me', userRouter);
+app.patch('/users/me/avatar', userRouter);
 
-app.get('/cards', require('./routes/cards'));
-app.post('/cards', require('./routes/cards'));
+app.get('/cards', cardRouter);
+app.post('/cards', cardRouter);
 
-app.delete('/cards/:cardId', require('./routes/cards'));
+app.delete('/cards/:cardId', cardRouter);
 
-app.put('/cards/:cardId/likes', require('./routes/cards'));
-app.delete('/cards/:cardId/likes', require('./routes/cards'));
+app.put('/cards/:cardId/likes', cardRouter);
+app.delete('/cards/:cardId/likes', cardRouter);
 
 app.get('/', (req, res) => {
-  res.send('<html><h1>Privet</h1></html>');
+  res.send('<html><h1>Check!</h1></html>');
+});
+
+app.get('/*', (req, res) => {
+  res.status(NOT_FOUND).send({ message: 'Страница не найдена' });
 });
