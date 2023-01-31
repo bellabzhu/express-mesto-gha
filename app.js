@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
-const { NOT_FOUND } = require('./utils/errors');
+const { NOT_FOUND, OK } = require('./utils/errors');
 
 const { PORT = 3000 } = process.env;
 mongoose.set('strictQuery', true);
@@ -51,9 +51,9 @@ app.put('/cards/:cardId/likes', cardRouter);
 app.delete('/cards/:cardId/likes', cardRouter);
 
 app.get('/', (req, res) => {
-  res.send('<html><h1>Check!</h1></html>');
+  res.status(OK).send({ message: 'Все в порядке!' });
 });
 
-app.get('/*', (req, res) => {
+app.use('/*', (req, res) => {
   res.status(NOT_FOUND).send({ message: 'Страница не найдена' });
 });

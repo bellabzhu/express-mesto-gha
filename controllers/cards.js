@@ -9,8 +9,8 @@ const Card = require('../models/card');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
-    .then((cards) => res.status(OK).send({ cards }))
-    .res.status(INTERNAL_SERVER).send({ message: 'На сервере произошла ошибка' });
+    .then((cards) => res.status(OK).send(cards))
+    .catch(() => res.status(INTERNAL_SERVER).send({ message: 'На сервере произошла ошибка' }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -30,7 +30,7 @@ module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        return res.status(NOT_FOUND).send({ message: `Карточка с id ${req.params.id} не найдена.` });
+        return res.status(NOT_FOUND).send({ message: 'Карточка с таким таким id не найдена.' });
       }
       return res.status(OK).send(card);
     })
@@ -42,7 +42,7 @@ module.exports.deleteCard = (req, res) => {
     });
 };
 
-const mongoPatchConfig = { new: true, runValidators: true, upsert: true };
+const mongoPatchConfig = { new: true, runValidators: true };
 
 module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate(
@@ -52,7 +52,7 @@ module.exports.likeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(NOT_FOUND).send({ message: `Карточка с id ${req.params.id} не найдена.` });
+        return res.status(NOT_FOUND).send({ message: 'Карточка с таким таким id не найдена.' });
       }
       return res.status(OK).send(card);
     })
@@ -61,7 +61,7 @@ module.exports.likeCard = (req, res) => {
         return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка.' });
       }
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        return res.status(NOT_FOUND).send({ message: `Карточка с id ${req.params.id} не найдена.` });
+        return res.status(NOT_FOUND).send({ message: 'Карточка с таким id не найдена.' });
       }
       return res.status(INTERNAL_SERVER).send({ message: 'На сервере произошла ошибка' });
     });
@@ -75,7 +75,7 @@ module.exports.deleteLikeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(NOT_FOUND).send({ message: `Карточка с id ${req.params.id} не найдена.` });
+        return res.status(NOT_FOUND).send({ message: 'Карточка с таким таким id не найдена.' });
       }
       return res.status(OK).send(card);
     })
@@ -84,7 +84,7 @@ module.exports.deleteLikeCard = (req, res) => {
         return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для снятия лайка.' });
       }
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        return res.status(NOT_FOUND).send({ message: `Карточка с id ${req.params.id} не найдена.` });
+        return res.status(NOT_FOUND).send({ message: 'Карточка с таким таким id не найдена.' });
       }
       return res.status(INTERNAL_SERVER).send({ message: 'На сервере произошла ошибка' });
     });

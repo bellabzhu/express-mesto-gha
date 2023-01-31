@@ -17,13 +17,13 @@ module.exports.getUser = (req, res) => {
   User.findById(req.params.id)
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND).send({ message: `Пользователь с id ${req.params.id} не найден.` });
+        return res.status(NOT_FOUND).send({ message: 'Пользователь c таким id не найден.' });
       }
       return res.status(OK).send(user);
     })
     .catch((err) => {
       if (err instanceof (mongoose.Error.CastError) || (mongoose.Error.ValidationError)) {
-        return res.status(BAD_REQUEST).send({ message: `Переданые некорректные данные. Неверный формат у id: ${req.params.id}` });
+        return res.status(BAD_REQUEST).send({ message: 'Переданые некорректные данные. Неверный формат у id пользователя' });
       }
       return res.status(INTERNAL_SERVER).send({ message: 'На сервере произошла ошибка' });
     });
@@ -42,7 +42,7 @@ module.exports.createUser = (req, res) => {
     });
 };
 
-const mongoUpdateConfig = { new: true, runValidators: true, upsert: true };
+const mongoUpdateConfig = { new: true, runValidators: true };
 
 module.exports.updateUser = (req, res) => {
   User.findByIdAndUpdate(
@@ -56,7 +56,7 @@ module.exports.updateUser = (req, res) => {
         return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
       }
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        return res.status(NOT_FOUND).send({ message: `Пользователь с id ${req.params.id} не найден.` });
+        return res.status(NOT_FOUND).send({ message: 'Пользователь c таким id не найден.' });
       }
       return res.status(INTERNAL_SERVER).send({ message: 'На сервере произошла ошибка' });
     });
@@ -76,7 +76,7 @@ module.exports.updateAvatar = (req, res) => {
         return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
       }
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        return res.status(NOT_FOUND).send({ message: `Пользователь с id ${req.params.id} не найден.` });
+        return res.status(NOT_FOUND).send({ message: 'Пользователь c таким id не найден.' });
       }
       return res.status(INTERNAL_SERVER).send({ message: 'На сервере произошла ошибка' });
     });
