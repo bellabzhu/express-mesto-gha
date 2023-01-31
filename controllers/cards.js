@@ -9,8 +9,7 @@ const Card = require('../models/card');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
-    .populate('owner')
-    .then((cards) => res.status(OK).send(cards))
+    .then((cards) => res.status(OK).send({ cards }))
     .res.status(INTERNAL_SERVER).send({ message: 'На сервере произошла ошибка' });
 };
 
@@ -29,13 +28,15 @@ module.exports.createCard = (req, res) => {
 
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
-    .then((card) => res.send({ card }))
+    .then((card) => {
+      if (!card) {
+        return res.status(NOT_FOUND).send({ message: `Карточка с id ${req.params.id} не найдена.` });
+      }
+      return res.status(OK).send(card);
+    })
     .catch((err) => {
       if (err instanceof (mongoose.Error.CastError) || (mongoose.Error.ValidationError)) {
         return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для удаления карточки.' });
-      }
-      if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        return res.status(NOT_FOUND).send({ message: `Карточка с id ${req.params.id} не найдена.` });
       }
       return res.status(INTERNAL_SERVER).send({ message: 'На сервере произошла ошибка' });
     });
@@ -49,7 +50,12 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     mongoPatchConfig,
   )
-    .then((card) => res.send({ card }))
+    .then((card) => {
+      if (!card) {
+        return res.status(NOT_FOUND).send({ message: `Карточка с id ${req.params.id} не найдена.` });
+      }
+      return res.status(OK).send(card);
+    })
     .catch((err) => {
       if (err instanceof (mongoose.Error.CastError) || (mongoose.Error.ValidationError)) {
         return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки лайка.' });
@@ -67,7 +73,12 @@ module.exports.deleteLikeCard = (req, res) => {
     { $pull: { likes: req.user._id } },
     mongoPatchConfig,
   )
-    .then((card) => res.send(card))
+    .then((card) => {
+      if (!card) {
+        return res.status(NOT_FOUND).send({ message: `Карточка с id ${req.params.id} не найдена.` });
+      }
+      return res.status(OK).send(card);
+    })
     .catch((err) => {
       if (err instanceof (mongoose.Error.CastError) || (mongoose.Error.ValidationError)) {
         return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для снятия лайка.' });
