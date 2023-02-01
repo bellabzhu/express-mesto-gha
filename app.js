@@ -5,7 +5,7 @@ const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const { NOT_FOUND, OK } = require('./utils/errors');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3000, MONGODB_URL = 'mongodb://localhost:27017/mestodb' } = process.env;
 mongoose.set('strictQuery', true);
 
 const app = express();
@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 async function start() {
   try {
-    await mongoose.connect('mongodb://localhost:27017/mestodb', {
+    await mongoose.connect(MONGODB_URL, {
       useNewUrlParser: true,
     });
     /* eslint-disable no-alert, no-console */
@@ -34,21 +34,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/users', userRouter);
-app.post('/users', userRouter);
-
-app.get('/users/:id', userRouter);
-
-app.patch('/users/me', userRouter);
-app.patch('/users/me/avatar', userRouter);
-
-app.get('/cards', cardRouter);
-app.post('/cards', cardRouter);
-
-app.delete('/cards/:cardId', cardRouter);
-
-app.put('/cards/:cardId/likes', cardRouter);
-app.delete('/cards/:cardId/likes', cardRouter);
+app.use('/users', userRouter);
+app.use('/cards', cardRouter);
 
 app.get('/', (req, res) => {
   res.status(OK).send({ message: 'Все в порядке!' });
