@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+
 const {
   OK,
   BAD_REQUEST,
@@ -30,9 +32,21 @@ module.exports.getUser = (req, res) => {
 };
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-
-  User.create({ name, about, avatar })
+  const {
+    name,
+    about,
+    avatar,
+    email,
+    password,
+  } = req.body;
+  const cryptedPass = bcrypt.hash(password, 10);
+  User.create({
+    name,
+    about,
+    avatar,
+    email,
+    cryptedPass,
+  })
     .then((user) => res.status(OK).send(user))
     .catch((err) => {
       if (err instanceof (mongoose.Error.CastError) || (mongoose.Error.ValidationError)) {
