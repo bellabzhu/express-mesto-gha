@@ -3,6 +3,8 @@ const BAD_REQUEST = 400;
 const NOT_FOUND = 404;
 const METHOD_NOT_ALLOWED = 405;
 const INTERNAL_SERVER = 500;
+const FORBIDDEN = 403;
+const NOT_UNIQUE = 409;
 
 module.exports = {
   OK,
@@ -10,4 +12,6 @@ module.exports = {
   NOT_FOUND,
   METHOD_NOT_ALLOWED,
   INTERNAL_SERVER,
+  FORBIDDEN,
+  NOT_UNIQUE,
 };

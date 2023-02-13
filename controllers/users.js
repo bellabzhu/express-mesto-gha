@@ -9,6 +9,7 @@ const {
   BAD_REQUEST,
   NOT_FOUND,
   INTERNAL_SERVER,
+  NOT_UNIQUE,
 } = require('../utils/errors');
 const User = require('../models/user');
 
@@ -41,7 +42,7 @@ module.exports.getUser = (req, res) => {
     });
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name,
     about,
@@ -61,6 +62,8 @@ module.exports.createUser = (req, res) => {
     .catch((err) => {
       if (err instanceof (mongoose.Error.CastError) || (mongoose.Error.ValidationError)) {
         return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.' });
+      } if (err.code === 11000) {
+        next(new NOT_UNIQUE({ message: 'Пользователь с таким email уже зарегистрирован.' }));
       }
       return res.status(INTERNAL_SERVER).send({ message: 'На сервере произошла ошибка' });
     });

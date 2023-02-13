@@ -4,6 +4,7 @@ const {
   BAD_REQUEST,
   NOT_FOUND,
   INTERNAL_SERVER,
+  FORBIDDEN,
 } = require('../utils/errors');
 const Card = require('../models/card');
 
@@ -31,6 +32,9 @@ module.exports.deleteCard = (req, res) => {
     .then((card) => {
       if (!card) {
         return res.status(NOT_FOUND).send({ message: 'Карточка с таким таким id не найдена.' });
+      }
+      if (req.user._id !== card.owner.toString()) {
+        return res.status(FORBIDDEN).send({ message: 'Это не ваша карточка! Удаляйте свои!' });
       }
       return res.status(OK).send(card);
     })
