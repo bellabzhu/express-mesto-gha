@@ -18,6 +18,13 @@ module.exports.getUsers = (req, res) => {
     .catch(() => res.status(INTERNAL_SERVER).send({ message: 'На сервере произошла ошибка' }));
 };
 
+module.exports.getCurrentUser = (req, res) => {
+  const userId = req.user._id;
+  User.findById(userId)
+    .then((user) => res.send(user))
+    .catch((err) => console.log(err));
+};
+
 module.exports.getUser = (req, res) => {
   User.findById(req.params.id)
     .then((user) => {

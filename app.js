@@ -6,6 +6,7 @@ const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
 const { NOT_FOUND, OK } = require('./utils/errors');
+const { auth } = require('./middlewares/auth');
 
 const { PORT = 3000, MONGODB_URL = 'mongodb://localhost:27017/mestodb' } = process.env;
 mongoose.set('strictQuery', true);
@@ -31,13 +32,9 @@ async function start() {
 
 start();
 
-app.use((req, res, next) => {
-  req.user = { _id: '63d7fff4cbcb122e9e0d25b6' };
-  next();
-});
-
 app.post('/signin', login);
 app.post('/signup', createUser);
+app.use(auth);
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
 
