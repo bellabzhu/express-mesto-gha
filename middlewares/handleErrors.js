@@ -1,9 +1,9 @@
-const { errorCode } = require('../utils/errors');
+const { statusCode } = require('../utils/errors');
 
 module.exports.handleError = (err, req, res, next) => {
-  const { status = errorCode.INTERNAL_SERVER, message } = err;
+  const { status = statusCode.INTERNAL_SERVER, message } = err;
   res.status(status).send({
-    message: status === errorCode.INTERNAL_SERVER
+    message: status === statusCode.INTERNAL_SERVER
       ? 'На сервере произошла ошибка'
       : message,
   });
