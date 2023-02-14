@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+const mongoUpdateConfig = { new: true, runValidators: true };
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 const {
@@ -69,39 +70,31 @@ module.exports.createUser = (req, res, next) => {
     });
 };
 
-module.exports.login = (req, res) => {
-  const { email, password } = req.body;
-  User.findOne({ email })
-    .then((user) => {
-      if (!user) {
-        return Promise.reject(new Error('Неправильная почта или пароль'));
-      }
-      return bcrypt.compare(password, user.password);
-    })
-    .then((matched) => {
-      if (!matched) {
-        return Promise.reject(new Error('Неправильная почта или пароль'));
-      }
-      const token = jwt.sign(
-        { _id: 'd285e3dceed844f902650f40' },
-        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
-        { expiresIn: '7d' },
-      );
-      return token;
-    })
-    .then((token) => {
-      res.cookie('jwt', token, {
-        maxAge: 3600000,
-        httpOnly: true,
-      });
-      res.status(OK).send(token);
-    })
-    .catch((err) => {
-      res.status(401).send({ message: err.message });
+module.exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return Promise.reject(new Error('Неправильная почта или пароль'));
+    }
+    const matched = await bcrypt.compare(password, user.password);
+    if (!matched) {
+      return Promise.reject(new Error('Неправильная почта или пароль'));
+    }
+    const token = jwt.sign(
+      { _id: user._id },
+      NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+      { expiresIn: '7d' },
+    );
+    res.cookie('jwt', token, {
+      maxAge: 3600000,
+      httpOnly: true,
     });
+    return res.status(OK).send(token);
+  } catch (err) {
+    return res.status(401).send({ message: err.message });
+  }
 };
-
-const mongoUpdateConfig = { new: true, runValidators: true };
 
 module.exports.updateUser = (req, res) => {
   User.findByIdAndUpdate(
