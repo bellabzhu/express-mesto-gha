@@ -6,7 +6,7 @@ const INTERNAL_SERVER = 500;
 const FORBIDDEN = 403;
 const NOT_UNIQUE = 409;
 
-module.exports = {
+module.exports.errorCode = {
   OK,
   BAD_REQUEST,
   NOT_FOUND,

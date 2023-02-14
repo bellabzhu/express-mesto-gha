@@ -14,36 +14,38 @@ const {
 } = require('../utils/errors');
 const User = require('../models/user');
 
-module.exports.getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(OK).send(users))
-    .catch(() => res.status(INTERNAL_SERVER).send({ message: 'На сервере произошла ошибка' }));
+module.exports.getUsers = async (req, res, next) => {
+  try {
+    const users = await User.find({});
+    res.status(OK).send(users);
+  } catch (error) {
+    next(error);
+  }
 };
 
-module.exports.getCurrentUser = (req, res) => {
-  const userId = req.user._id;
-  User.findById(userId)
-    .then((user) => res.send(user))
-    .catch((err) => console.log(err));
+module.exports.getCurrentUser = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+    res.send(user);
+  } catch (error) {
+    next(error);
+  }
 };
 
-module.exports.getUser = (req, res) => {
-  User.findById(req.params.id)
-    .then((user) => {
-      if (!user) {
-        return res.status(NOT_FOUND).send({ message: 'Пользователь c таким id не найден.' });
-      }
-      return res.status(OK).send(user);
-    })
-    .catch((err) => {
-      if (err instanceof (mongoose.Error.CastError) || (mongoose.Error.ValidationError)) {
-        return res.status(BAD_REQUEST).send({ message: 'Переданые некорректные данные. Неверный формат у id пользователя' });
-      }
-      return res.status(INTERNAL_SERVER).send({ message: 'На сервере произошла ошибка' });
-    });
+module.exports.getUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      res.status(NOT_FOUND).send({ message: 'Пользователь c таким id не найден.' });
+    }
+    res.status(OK).send(user);
+  } catch (error) {
+    next(error);
+  }
 };
 
-module.exports.createUser = (req, res, next) => {
+module.exports.createUser = async (req, res, next) => {
   const {
     name,
     about,
@@ -62,26 +64,26 @@ module.exports.createUser = (req, res, next) => {
     .then((user) => res.status(OK).send(user))
     .catch((err) => {
       if (err instanceof (mongoose.Error.CastError) || (mongoose.Error.ValidationError)) {
-        return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.' });
+        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.' });
       } if (err.code === 11000) {
         next(new NOT_UNIQUE({ message: 'Пользователь с таким email уже зарегистрирован.' }));
       }
-      return res.status(INTERNAL_SERVER).send({ message: 'На сервере произошла ошибка' });
+      res.status(INTERNAL_SERVER).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
-module.exports.login = async (req, res) => {
+module.exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
-      return Promise.reject(new Error('Неправильная почта или пароль'));
+      next(new Error('Неправильная почта или пароль'));
     }
     const matched = await bcrypt.compare(password, user.password);
     if (!matched) {
-      return Promise.reject(new Error('Неправильная почта или пароль'));
+      next(new Error('Неправильная почта или пароль'));
     }
-    const token = jwt.sign(
+    const token = await jwt.sign(
       { _id: user._id },
       NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
       { expiresIn: '7d' },
@@ -91,46 +93,35 @@ module.exports.login = async (req, res) => {
       httpOnly: true,
       sameSite: true,
     });
-    return res.status(OK).send(token);
-  } catch (err) {
-    return res.status(401).send({ message: err.message });
+    res.status(OK).send(token);
+  } catch (error) {
+    next(error);
   }
 };
 
-module.exports.updateUser = (req, res) => {
-  User.findByIdAndUpdate(
-    req.user._id,
-    req.body,
-    mongoUpdateConfig,
-  )
-    .then((user) => res.status(OK).send(user))
-    .catch((err) => {
-      if (err instanceof (mongoose.Error.CastError) || (mongoose.Error.ValidationError)) {
-        return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
-      }
-      if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        return res.status(NOT_FOUND).send({ message: 'Пользователь c таким id не найден.' });
-      }
-      return res.status(INTERNAL_SERVER).send({ message: 'На сервере произошла ошибка' });
-    });
+module.exports.updateUser = async (req, res, next) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      req.body,
+      mongoUpdateConfig,
+    );
+    res.status(OK).send(user);
+  } catch (error) {
+    next(error);
+  }
 };
 
-module.exports.updateAvatar = (req, res) => {
-  const { avatar } = req.body;
-
-  User.findByIdAndUpdate(
-    req.user._id,
-    { avatar },
-    mongoUpdateConfig,
-  )
-    .then((user) => res.status(OK).send(user))
-    .catch((err) => {
-      if (err instanceof (mongoose.Error.CastError) || (mongoose.Error.ValidationError)) {
-        return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
-      }
-      if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        return res.status(NOT_FOUND).send({ message: 'Пользователь c таким id не найден.' });
-      }
-      return res.status(INTERNAL_SERVER).send({ message: 'На сервере произошла ошибка' });
-    });
+module.exports.updateAvatar = async (req, res, next) => {
+  try {
+    const { avatar } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { avatar },
+      mongoUpdateConfig,
+    );
+    res.status(OK).send(user);
+  } catch (error) {
+    next(error);
+  }
 };
