@@ -73,7 +73,7 @@ module.exports.createUser = (req, res, next) => {
 module.exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return Promise.reject(new Error('Неправильная почта или пароль'));
     }
@@ -89,6 +89,7 @@ module.exports.login = async (req, res) => {
     res.cookie('jwt', token, {
       maxAge: 3600000,
       httpOnly: true,
+      sameSite: true,
     });
     return res.status(OK).send(token);
   } catch (err) {
