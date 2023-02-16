@@ -64,6 +64,7 @@ module.exports.deleteLikeCard = async (req, res, next) => {
     );
     if (!card) {
       next(new Error404('Карточка с таким таким id не найдена.'));
+      return;
     }
     res.status(statusCode.OK).send(card);
   } catch (err) {
