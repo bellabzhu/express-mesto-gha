@@ -42,7 +42,7 @@ module.exports.getUser = async (req, res, next) => {
   }
 };
 
-module.exports.createUser = async (req, res, next) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name,
     about,
@@ -68,10 +68,11 @@ module.exports.createUser = async (req, res, next) => {
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
         next(new Error400('Переданы некорректные данные при создании пользователя.'));
-      } if (err.code === 11000) {
+      } else if (err.code === 11000) {
         next(new Error409('Пользователь с таким email уже зарегистрирован.'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -81,10 +82,12 @@ module.exports.login = async (req, res, next) => {
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
       next(new Error401('Неправильная почта или пароль'));
+      return;
     }
     const matched = await bcrypt.compare(password, user.password);
     if (!matched) {
       next(new Error401('Неправильная почта или пароль'));
+      return;
     }
     const token = await jwt.sign(
       { _id: user._id },
@@ -96,7 +99,7 @@ module.exports.login = async (req, res, next) => {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
       })
-      .send({ message: 'Токен сохранен в куки' }).end();
+      .send({ message: 'Токен сохранен в куки' });
   } catch (err) {
     next(err);
   }

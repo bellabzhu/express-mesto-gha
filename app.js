@@ -45,7 +45,7 @@ start();
 app.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    password: Joi.string().min(8).required(),
+    password: Joi.string().required(),
   }),
 }), login);
 
@@ -55,7 +55,7 @@ app.post('/signup', celebrate({
     about: Joi.string().min(2).max(30),
     avatar: Joi.string().pattern(regexURL),
     email: Joi.string().required().email(),
-    password: Joi.string().min(8).required(),
+    password: Joi.string().required(),
   }),
 }), createUser);
 
@@ -63,10 +63,6 @@ app.use(auth);
 
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
-
-app.get('/', (req, res) => {
-  res.status(OK).send({ message: 'Все в порядке!' });
-});
 
 app.use('/*', (req, res, next) => {
   next(new Error404('Страница не найдена'));

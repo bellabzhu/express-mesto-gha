@@ -5,7 +5,7 @@ const auth = async (req, res, next) => {
   const { token } = req.cookies;
   let payload;
   try {
-    payload = await jwt.verify(token, 'dev-secret');
+    payload = jwt.verify(token, 'dev-secret');
     req.user = payload;
     next();
   } catch (err) {
