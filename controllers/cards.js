@@ -3,6 +3,8 @@ const Card = require('../models/card');
 const Error403 = require('../errors/Error403');
 const Error404 = require('../errors/Error404');
 
+const mongoPatchConfig = { new: true, runValidators: true };
+
 module.exports.getCards = async (req, res, next) => {
   try {
     const cards = await Card.find({});
@@ -36,8 +38,6 @@ module.exports.deleteCard = async (req, res, next) => {
   }
 };
 
-const mongoPatchConfig = { new: true, runValidators: true };
-
 module.exports.likeCard = async (req, res, next) => {
   try {
     const card = await Card.findByIdAndUpdate(
@@ -56,8 +56,9 @@ module.exports.likeCard = async (req, res, next) => {
 
 module.exports.deleteLikeCard = async (req, res, next) => {
   try {
+    const { cardId } = req.params;
     const card = await Card.findByIdAndUpdate(
-      req.params.cardId,
+      cardId,
       { $pull: { likes: req.user._id } },
       mongoPatchConfig,
     );
