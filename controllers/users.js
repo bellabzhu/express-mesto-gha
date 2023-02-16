@@ -92,7 +92,7 @@ module.exports.login = async (req, res, next) => {
       { expiresIn: '7d' },
     );
     res.status(statusCode.OK)
-      .cookie('jwt', token, {
+      .cookie('token', token, {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
       })
