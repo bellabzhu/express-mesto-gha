@@ -23,7 +23,7 @@ module.exports.getCurrentUser = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const user = await User.findById(userId);
-    res.send(user);
+    res.status(statusCode.OK).send(user);
   } catch (err) {
     next(err);
   }
