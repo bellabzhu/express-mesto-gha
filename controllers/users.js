@@ -9,7 +9,6 @@ const { statusCode } = require('../utils/errors');
 const User = require('../models/user');
 
 const mongoUpdateConfig = { new: true, runValidators: true };
-const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports.getUsers = async (req, res, next) => {
   try {
@@ -89,7 +88,7 @@ module.exports.login = async (req, res, next) => {
     }
     const token = await jwt.sign(
       { _id: user._id },
-      NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+      'dev-secret',
       { expiresIn: '7d' },
     );
     res.status(statusCode.OK)
