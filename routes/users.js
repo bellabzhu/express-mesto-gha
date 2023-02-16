@@ -13,21 +13,14 @@ const {
 router.get('/', getUsers);
 
 router.get('/:id', celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
-    avatar: Joi.string().pattern(regexURL),
-  }),
   params: Joi.object().keys({
     id: Joi.string().length(24).hex(),
   }),
 }), getUser);
 
 router.get('/me', celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
-    avatar: Joi.string().pattern(regexURL),
+  params: Joi.object().keys({
+    id: Joi.string().length(24).hex(),
   }),
 }), getCurrentUser);
 
