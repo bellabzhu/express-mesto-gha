@@ -9,9 +9,11 @@ const { limiter } = require('./middlewares/limiter');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
-const { NOT_FOUND, OK } = require('./utils/errors');
+const { OK } = require('./utils/errors');
+const { Error404 } = require('./errors/Error404');
 const { auth } = require('./middlewares/auth');
 const { regexURL } = require('./utils/constants');
+const { handleErrors } = require('./middlewares/handleErrors');
 
 const { PORT = 3000, MONGODB_URL = 'mongodb://localhost:27017/mestodb' } = process.env;
 mongoose.set('strictQuery', true);
@@ -23,7 +25,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(helmet());
 app.use(limiter);
-app.use(errors());
 
 async function start() {
   try {
@@ -59,6 +60,7 @@ app.post('/signup', celebrate({
 }), createUser);
 
 app.use(auth);
+
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
 
@@ -66,6 +68,8 @@ app.get('/', (req, res) => {
   res.status(OK).send({ message: 'Все в порядке!' });
 });
 
-app.use('/*', (req, res) => {
-  res.status(NOT_FOUND).send({ message: 'Страница не найдена' });
+app.use('/*', (req, res, next) => {
+  next(new Error404('Страница не найдена'));
 });
+app.use(errors());
+app.use(handleErrors);

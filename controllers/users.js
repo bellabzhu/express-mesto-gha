@@ -1,25 +1,22 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { Error400 } = require('../errors/Error400');
+const { Error401 } = require('../errors/Error401');
+const { Error404 } = require('../errors/Error404');
+const { Error409 } = require('../errors/Error409');
+const { statusCode } = require('../utils/errors');
+const User = require('../models/user');
 
 const mongoUpdateConfig = { new: true, runValidators: true };
 const { NODE_ENV, JWT_SECRET } = process.env;
 
-const {
-  OK,
-  BAD_REQUEST,
-  NOT_FOUND,
-  INTERNAL_SERVER,
-  NOT_UNIQUE,
-} = require('../utils/errors');
-const User = require('../models/user');
-
 module.exports.getUsers = async (req, res, next) => {
   try {
     const users = await User.find({});
-    res.status(OK).send(users);
-  } catch (error) {
-    next(error);
+    res.status(statusCode.OK).send(users);
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -28,8 +25,8 @@ module.exports.getCurrentUser = async (req, res, next) => {
     const userId = req.user._id;
     const user = await User.findById(userId);
     res.send(user);
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -37,11 +34,12 @@ module.exports.getUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
-      res.status(NOT_FOUND).send({ message: 'Пользователь c таким id не найден.' });
+      next(new Error404('Пользователь c таким id не найден.'));
+      return;
     }
-    res.status(OK).send(user);
-  } catch (error) {
-    next(error);
+    res.status(statusCode.OK).send(user);
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -61,14 +59,14 @@ module.exports.createUser = async (req, res, next) => {
       email,
       password: hash,
     }))
-    .then((user) => res.status(OK).send(user))
+    .then((user) => res.status(statusCode.OK).send(user))
     .catch((err) => {
       if (err instanceof (mongoose.Error.CastError) || (mongoose.Error.ValidationError)) {
-        res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.' });
+        next(new Error400('Переданы некорректные данные при создании пользователя.'));
       } if (err.code === 11000) {
-        next(new NOT_UNIQUE({ message: 'Пользователь с таким email уже зарегистрирован.' }));
+        next(new Error409('Пользователь с таким email уже зарегистрирован.'));
       }
-      res.status(INTERNAL_SERVER).send({ message: 'На сервере произошла ошибка' });
+      next(err);
     });
 };
 
@@ -77,25 +75,27 @@ module.exports.login = async (req, res, next) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
-      next(new Error('Неправильная почта или пароль'));
+      console.log('1');
+      next(new Error401('Неправильная почта или пароль'));
     }
+    console.log('2');
     const matched = await bcrypt.compare(password, user.password);
     if (!matched) {
-      next(new Error('Неправильная почта или пароль'));
+      next(new Error401('Неправильная почта или пароль'));
     }
     const token = await jwt.sign(
       { _id: user._id },
       NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
       { expiresIn: '7d' },
     );
-    res.cookie('jwt', token, {
-      maxAge: 3600000,
-      httpOnly: true,
-      sameSite: true,
-    });
-    res.status(OK).send(token);
-  } catch (error) {
-    next(error);
+    res.status(statusCode.OK)
+      .cookie('jwt', token, {
+        maxAge: 3600000 * 24 * 7,
+        httpOnly: true,
+      })
+      .send({ message: 'Токен сохранен в куки' }).end();
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -106,9 +106,9 @@ module.exports.updateUser = async (req, res, next) => {
       req.body,
       mongoUpdateConfig,
     );
-    res.status(OK).send(user);
-  } catch (error) {
-    next(error);
+    res.status(statusCode.OK).send(user);
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -120,8 +120,8 @@ module.exports.updateAvatar = async (req, res, next) => {
       { avatar },
       mongoUpdateConfig,
     );
-    res.status(OK).send(user);
-  } catch (error) {
-    next(error);
+    res.status(statusCode.OK).send(user);
+  } catch (err) {
+    next(err);
   }
 };
