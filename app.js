@@ -71,5 +71,6 @@ app.get('/', (req, res) => {
 app.use('/*', (req, res, next) => {
   next(new Error404('Страница не найдена'));
 });
+
 app.use(errors());
 app.use(handleErrors);
