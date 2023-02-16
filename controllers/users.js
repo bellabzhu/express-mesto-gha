@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { Error400 } = require('../errors/Error400');
-const { Error401 } = require('../errors/Error401');
-const { Error404 } = require('../errors/Error404');
-const { Error409 } = require('../errors/Error409');
+const Error400 = require('../errors/Error400');
+const Error401 = require('../errors/Error401');
+const Error404 = require('../errors/Error404');
+const Error409 = require('../errors/Error409');
 const { statusCode } = require('../utils/errors');
 const User = require('../models/user');
 

@@ -1,7 +1,7 @@
 const { statusCode } = require('../utils/errors');
 const Card = require('../models/card');
-const { Error403 } = require('../errors/Error403');
-const { Error404 } = require('../errors/Error404');
+const Error403 = require('../errors/Error403');
+const Error404 = require('../errors/Error404');
 
 module.exports.getCards = async (req, res, next) => {
   try {

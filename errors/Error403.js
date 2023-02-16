@@ -8,4 +8,4 @@ class Error403 extends Error {
   }
 }
 
-module.exports = { Error403 };
+module.exports = Error403;

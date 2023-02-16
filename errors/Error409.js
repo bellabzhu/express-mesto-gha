@@ -8,4 +8,4 @@ class Error409 extends Error {
   }
 }
 
-module.exports = { Error409 };
+module.exports = Error409;
