@@ -59,9 +59,15 @@ module.exports.createUser = async (req, res, next) => {
       email,
       password: hash,
     }))
-    .then((user) => res.status(statusCode.OK).send(user))
+    .then((user) => res.status(statusCode.OK).send({
+      email: user.email,
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      _id: user._id,
+    }))
     .catch((err) => {
-      if (err instanceof (mongoose.Error.CastError) || (mongoose.Error.ValidationError)) {
+      if (err instanceof mongoose.Error.ValidationError) {
         next(new Error400('Переданы некорректные данные при создании пользователя.'));
       } if (err.code === 11000) {
         next(new Error409('Пользователь с таким email уже зарегистрирован.'));
