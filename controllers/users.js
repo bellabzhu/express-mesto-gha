@@ -75,10 +75,8 @@ module.exports.login = async (req, res, next) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
-      console.log('1');
       next(new Error401('Неправильная почта или пароль'));
     }
-    console.log('2');
     const matched = await bcrypt.compare(password, user.password);
     if (!matched) {
       next(new Error401('Неправильная почта или пароль'));
