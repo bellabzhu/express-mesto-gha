@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const { statusCode } = require('../utils/errors');
 const Card = require('../models/card');
 const Error403 = require('../errors/Error403');
@@ -56,9 +57,8 @@ module.exports.likeCard = async (req, res, next) => {
 
 module.exports.deleteLikeCard = async (req, res, next) => {
   try {
-    const { cardId } = req.params;
     const card = await Card.findByIdAndUpdate(
-      cardId,
+      req.params.cardId,
       { $pull: { likes: req.user._id } },
       mongoPatchConfig,
     );
@@ -67,6 +67,10 @@ module.exports.deleteLikeCard = async (req, res, next) => {
     }
     res.status(statusCode.OK).send(card);
   } catch (err) {
-    next(err);
+    if (err instanceof mongoose.Error.CastError) {
+      next(new Error404('Карточка с таким таким id не найдена.'));
+    } else {
+      next(err);
+    }
   }
 };
