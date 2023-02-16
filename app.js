@@ -9,7 +9,6 @@ const { limiter } = require('./middlewares/limiter');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
-const { OK } = require('./utils/errors');
 const Error404 = require('./errors/Error404');
 const { auth } = require('./middlewares/auth');
 const { regexURL } = require('./utils/constants');
